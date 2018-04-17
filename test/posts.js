@@ -48,7 +48,6 @@ describe('posts', () => {
         }));
 
     it('gets the post', () => {
-        post = post
         wrapped.run({
             httpMethod: 'GET',
             path: '/posts'
@@ -64,20 +63,27 @@ describe('posts', () => {
         })
     });
 
-    it('deletes a post', () =>
+    it('deletes a post', () => {
+        // OK why does this need to be here? What the heck?
+        post = post        
         wrapped.run({
             httpMethod: 'DELETE',
-            path: '/posts'+ {
-                id: post.id,
-            },
-        }));
+            path: `/posts/${post.id}`,
+        }).then((response) => {
+            expect(response.statusCode).to.equal(200);
+        })
+        
+    });
 
-    it('checks that the post is deleted', () =>
+    it('checks that the post is deleted', () => {
+        // OK why does this need to be here? What the heck?
+        post = post
         wrapped.run({
             httpMethod: 'GET',
             path: '/posts',
         }).then((response) => {
             const createdPost = JSON.parse(response.body).Items.filter(item => item.id === post.id);
             expect(createdPost).to.be.eql([]);
-        }));
+        })
+    });
 });

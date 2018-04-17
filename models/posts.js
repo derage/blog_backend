@@ -83,7 +83,7 @@ class BlogPost {
                     fulfill({id: id})
                 }
             })
-        }).then((post) => ({ post: post }));
+        }).then((post) => ({ post: post }))
     }
 }
 

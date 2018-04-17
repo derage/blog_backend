@@ -43,7 +43,7 @@ router.delete('/:postId', function(req, res, next) {
             res.json({post: post})
         })
         .catch(function(err){
-            console.log(err)
+            console.log("wadawdaawdafafgw")
             res.json({err: err.message})
         })
 });
