@@ -5,14 +5,12 @@ var router = express.Router();
 /* GET home page. */
 router.get('/', function(req, res, next) {
     db.BlogPost.getPosts({})
-        .then(response => next(null, response))
-        .catch(next);
-        // .then(response => {
-        //     res.json(response);
-        // })
-        // .catch(err => {
-        //     res.status(400).json({ error: err });
-        // });
+        .then(response => {
+            res.json(response);
+        })
+        .catch(err => {
+            res.status(400).json({ error: err.message });
+        });
 });
 
 router.post('/', function(req, res, next) {
@@ -20,7 +18,7 @@ router.post('/', function(req, res, next) {
         // .then(response => next(null, response))
         // .catch(next);
         .then(function(post){
-            res.json(post)
+            res.json({post: post})
         })
         .catch(function(err){
             console.log(err)
@@ -30,14 +28,24 @@ router.post('/', function(req, res, next) {
 
 router.put('/:postId', function(req, res, next) {
     db.BlogPost.updatePost(req.params.postId, req.body)
-        .then(response => next(null, response))
-        .catch(next);
+        .then(function(post){
+            res.json({post: post})
+        })
+        .catch(function(err){
+            console.log(err)
+            res.json({err: err.message})
+        })
 });
 
 router.delete('/:postId', function(req, res, next) {
     db.BlogPost.deletePost(req.params.postId)
-        .then(response => next(null, response))
-        .catch(next);
+        .then(function(post){
+            res.json({post: post})
+        })
+        .catch(function(err){
+            console.log(err)
+            res.json({err: err.message})
+        })
 });
 
 module.exports = router;

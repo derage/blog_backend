@@ -169,4 +169,4 @@ functions:
 custom:
   scripts:
     commands:
-      createdb: .tools/createdb.sh
+      createdb: SERVERLESS_STAGE=${opt:stage, self:provider.stage} SERVERLESS_PROJECT=${self:service} SERVERLESS_REGION=${opt:region, self:provider.region} TABLE_NAME=${self:provider.environment.SERVERLESS_PROJECT}-${self:provider.environment.SERVERLESS_STAGE} .tools/createdb.sh

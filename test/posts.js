@@ -14,63 +14,59 @@ const wrapped = wrapper.wrap(mod, { handler: 'handler' });
 describe('posts', () => {
     let post;
 
-    it('test hello', () =>
+    it('creates a post', () =>
         wrapped.run({
             httpMethod: 'POST',
             path: '/posts',
-            body: `{"title": "test"}`
-        }).then((response) => {
-            console.log(response)
-            expect(response).not.to.be.equal(null);
-        }));
-
-
-    it('creates a post', () =>
-        wrapped.run({
-            method: 'POST',
-            path: '/posts',
-            body: {
-                title: 'Test post',
-                content: 'Test content',
+            body: { 
+                title: "Test post",
+                content: "Test content"
             },
+            headers: {
+                'Content-Type': 'application/json'
+            }
         }).then((response) => {
-            console.log(response)
-            post = response.post;
+            post = JSON.parse(response.body).post;
             expect(post.id).not.to.be.equal(null);
         }));
 
     it('updates the post', () =>
         wrapped.run({
-            method: 'PUT',
-
-            path: '/posts'+ {
-                id: post.id,
-            },
+            httpMethod: 'PUT',
+            path: `/posts/${post.id}`,
             body: {
-                title: 'Test post edited',
+                title: 'Test post edited', 
                 content: 'Test content edited',
-                date: post.date,
+                createdAt: post.createdAt
             },
+            headers: {
+                'Content-Type': 'application/json'
+            }
         }).then((response) => {
-            post = response.post;
+            post = JSON.parse(response.body).post;
             expect(post.id).not.to.be.equal(null);
         }));
 
-    it('gets the post', () =>
+    it('gets the post', () => {
+        post = post
         wrapped.run({
-            method: 'GET',
+            httpMethod: 'GET',
             path: '/posts'
         }).then((response) => {
-            const createdPost = response.Items.filter(item => item.id === post.id)[0];
+            console.log(post.id)
+            const createdPost = JSON.parse(response.body).Items.filter(item => {
+                item.id === post.id
+                })[0];
             expect(createdPost.id).to.be.equal(post.id);
             expect(createdPost.title).to.be.equal('Test post edited');
             expect(createdPost.content).to.be.equal('Test content edited');
             expect(createdPost.date).to.be.equal(post.date);
-        }));
+        })
+    });
 
     it('deletes a post', () =>
         wrapped.run({
-            method: 'DELETE',
+            httpMethod: 'DELETE',
             path: '/posts'+ {
                 id: post.id,
             },
@@ -78,10 +74,10 @@ describe('posts', () => {
 
     it('checks that the post is deleted', () =>
         wrapped.run({
-            method: 'GET',
+            httpMethod: 'GET',
             path: '/posts',
         }).then((response) => {
-            const createdPost = response.Items.filter(item => item.id === post.id);
+            const createdPost = JSON.parse(response.body).Items.filter(item => item.id === post.id);
             expect(createdPost).to.be.eql([]);
         }));
 });

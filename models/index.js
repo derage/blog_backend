@@ -3,7 +3,7 @@ const AWS = require( "aws-sdk")
 
 
 const config = {
-    region: AWS.config.region || process.env.SERVERLESS_REGION || 'us-east-1',
+    region: process.env.SERVERLESS_REGION || 'us-east-1',
 };
 
 dynamo.AWS.config.update(config);
