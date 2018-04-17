@@ -14,16 +14,27 @@ const wrapped = wrapper.wrap(mod, { handler: 'handler' });
 describe('posts', () => {
     let post;
 
+    it('test hello', () =>
+        wrapped.run({
+            httpMethod: 'POST',
+            path: '/posts',
+            body: `{"title": "test"}`
+        }).then((response) => {
+            console.log(response)
+            expect(response).not.to.be.equal(null);
+        }));
+
+
     it('creates a post', () =>
         wrapped.run({
             method: 'POST',
+            path: '/posts',
             body: {
                 title: 'Test post',
                 content: 'Test content',
             },
         }).then((response) => {
-            console.log("gelllkloawdwdahWJ'IDA;WDNA;UWDAW" +
-                "DAWDAWDAWDAW")
+            console.log(response)
             post = response.post;
             expect(post.id).not.to.be.equal(null);
         }));
@@ -31,7 +42,8 @@ describe('posts', () => {
     it('updates the post', () =>
         wrapped.run({
             method: 'PUT',
-            path: {
+
+            path: '/posts'+ {
                 id: post.id,
             },
             body: {
@@ -47,6 +59,7 @@ describe('posts', () => {
     it('gets the post', () =>
         wrapped.run({
             method: 'GET',
+            path: '/posts'
         }).then((response) => {
             const createdPost = response.Items.filter(item => item.id === post.id)[0];
             expect(createdPost.id).to.be.equal(post.id);
@@ -58,7 +71,7 @@ describe('posts', () => {
     it('deletes a post', () =>
         wrapped.run({
             method: 'DELETE',
-            path: {
+            path: '/posts'+ {
                 id: post.id,
             },
         }));
@@ -66,6 +79,7 @@ describe('posts', () => {
     it('checks that the post is deleted', () =>
         wrapped.run({
             method: 'GET',
+            path: '/posts',
         }).then((response) => {
             const createdPost = response.Items.filter(item => item.id === post.id);
             expect(createdPost).to.be.eql([]);
