@@ -11,11 +11,23 @@ const expect = mochaPlugin.chai.expect;
 
 const wrapped = wrapper.wrap(mod, { handler: 'handler' });
 
-describe('posts', () => {
-    let post;
+const db = require("../models")
 
-    it('creates a post', () =>
-        wrapped.run({
+var base64 = require('base-64');
+
+function createPost(post){
+    if (!post){
+        post = {}
+    }
+    post.title = typeof post.title  !== 'undefined' ?  post.title  : "test title";
+    post.content = typeof post.content  !== 'undefined' ?  post.content  : "test content";
+    post.details = typeof post.details  !== 'undefined' ?  post.details  : "test details";
+    return db.BlogPost.savePost(post)
+}
+
+describe('posts', () => {
+    it('creates a post', function(){
+        return wrapped.run({
             httpMethod: 'POST',
             path: '/posts',
             body: { 
@@ -25,65 +37,62 @@ describe('posts', () => {
             headers: {
                 'Content-Type': 'application/json'
             }
-        }).then((response) => {
-            post = JSON.parse(response.body).post;
-            expect(post.id).not.to.be.equal(null);
-        }));
-
-    it('updates the post', () =>
-        wrapped.run({
-            httpMethod: 'PUT',
-            path: `/posts/${post.id}`,
-            body: {
-                title: 'Test post edited', 
-                content: 'Test content edited',
-                createdAt: post.createdAt
-            },
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }).then((response) => {
-            post = JSON.parse(response.body).post;
-            expect(post.id).not.to.be.equal(null);
-        }));
-
-    it('gets the post', () => {
-        wrapped.run({
-            httpMethod: 'GET',
-            path: '/posts'
-        }).then((response) => {
-            console.log(post.id)
-            const createdPost = JSON.parse(response.body).Items.filter(item => {
-                item.id === post.id
-                })[0];
-            expect(createdPost.id).to.be.equal(post.id);
-            expect(createdPost.title).to.be.equal('Test post edited');
-            expect(createdPost.content).to.be.equal('Test content edited');
-            expect(createdPost.date).to.be.equal(post.date);
         })
-    });
-
-    it('deletes a post', () => {
-        // OK why does this need to be here? What the heck?
-        post = post        
-        wrapped.run({
-            httpMethod: 'DELETE',
-            path: `/posts/${post.id}`,
-        }).then((response) => {
-            expect(response.statusCode).to.equal(200);
+        //Check post was created
+        .then((response) => {
+            const post = JSON.parse(response.body).post;
+            expect(post.id).not.to.be.equal(null);
+            db.BlogPost.deletePost(post.id)
         })
         
-    });
+    } );
+    
+    it('updates the post', function() {
+        return createPost()
+        .then(function(post){
+            return wrapped.run({
+                httpMethod: 'PUT',
+                path: `/posts/${post.id}`,
+                body: {
+                    title: 'Test post edited', 
+                    content: 'Test content edited',
+                    createdAt: post.createdAt
+                },
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(function(response) {
+                const post = JSON.parse(response.body).post;
+                expect(response.statusCode).to.equal(200);
+                expect(post).not.to.be.equal(null);
+                expect(post.id).not.to.be.equal(null);
+                expect(post.title).to.be.equal('Test post edited');
+                expect(Buffer.from(post.content.data).toString('ascii')).to.be.equal('Test content edited');
+                expect(post.date).to.be.equal(post.date);
+                db.BlogPost.deletePost(post.id)
+            })
+        })
+    })
 
-    it('checks that the post is deleted', () => {
-        // OK why does this need to be here? What the heck?
-        post = post
-        wrapped.run({
-            httpMethod: 'GET',
-            path: '/posts',
-        }).then((response) => {
-            const createdPost = JSON.parse(response.body).Items.filter(item => item.id === post.id);
-            expect(createdPost).to.be.eql([]);
+    it('deletes a post', () => {
+        return createPost()
+        .then((post)=>{
+            return wrapped.run({
+                httpMethod: 'DELETE',
+                path: `/posts/${post.id}`,
+            })
+            .then((response) => {
+                expect(response.statusCode).to.equal(200);
+                return wrapped.run({
+                    httpMethod: 'GET',
+                    path: '/posts',
+                }).then((response) => {
+                    const createdPost = JSON.parse(response.body).Items.filter(item => item.id === post.id);
+                    expect(createdPost).to.be.eql([]);
+                    db.BlogPost.deletePost(createdPost.id)
+                })
+            })
         })
     });
 });

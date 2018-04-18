@@ -13,11 +13,10 @@ class BlogPost {
     constructor() {
         this.model = dynamo.define('BlogPost', {
             hashKey : 'id',
-            rangeKey : 'createdAt',
+            // rangeKey : 'createdAt',
             timestamps : true,
             schema : {
                 id : dynamo.types.uuid(),
-                email   : Joi.string().email(),
                 title   : Joi.string(),
                 content : Joi.binary(),
                 details : Joi.string(),
@@ -44,14 +43,11 @@ class BlogPost {
          // OK why does this need to be here? What the heck? the method doesnt have access unless this is here?
         const model = this.model
         return new Promise(function (fulfill, reject){
-            const date = Date.now();
-            // const id = date.toString();
-            const payload = Object.assign({}, post, date );
-            model.create(payload,function (err, createdPost) {
+            model.create(post,function (err, createdPost) {
                 if(err){
                     reject(err)
                 } else {
-                    fulfill(createdPost)
+                    fulfill(createdPost.attrs)
                 }
 
             })
@@ -67,10 +63,12 @@ class BlogPost {
                 if(err){
                     reject(err)
                 } else {
-                    fulfill(createdPost)
+                    fulfill(createdPost.attrs)
                 }
             })
-        }).then((post) => ({ post: post }));
+        }).then((post) => {
+            return { post: post }
+        })
     }
 
     deletePost(id) {

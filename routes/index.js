@@ -29,7 +29,7 @@ router.post('/', function(req, res, next) {
 router.put('/:postId', function(req, res, next) {
     db.BlogPost.updatePost(req.params.postId, req.body)
         .then(function(post){
-            res.json({post: post})
+            res.json(post)
         })
         .catch(function(err){
             console.log(err)
@@ -43,8 +43,7 @@ router.delete('/:postId', function(req, res, next) {
             res.json({post: post})
         })
         .catch(function(err){
-            console.log("wadawdaawdafafgw")
-            res.json({err: err.message})
+            res.status(400).json({err: err.message})
         })
 });
 
