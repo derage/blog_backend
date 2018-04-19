@@ -21,6 +21,7 @@ class BlogPost {
                 content : Joi.binary(),
                 details : Joi.string(),
                 tags   : dynamo.types.stringSet(),
+                email : Joi.string().email(),
             },
             tableName: process.env.TABLE_NAME
         })
